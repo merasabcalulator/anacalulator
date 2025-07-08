@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Calculator Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        .calculator-section {
+            display: none; /* Hidden by default */
+        }
+        .calculator-section.active {
+            display: block; /* Shown when active */
+        }
+        .input-group label {
+            font-weight: 500;
+            color: #374151;
+        }
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-top: 4px;
+            font-size: 1rem;
+            color: #1f2937;
+            background-color: #ffffff;
+            transition: border-color 0.2s;
+        }
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #4f46e5; /* Indigo-600 */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5); /* Indigo-500 with opacity */
+        }
+        .result-box {
+            background-color: #e0e7ff; /* Indigo-100 */
+            border: 1px solid #a5b4fc; /* Indigo-300 */
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #c7d2fe; /* Indigo-200 */
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-item span:first-child {
+            font-weight: 500;
+            color: #4338ca; /* Indigo-700 */
+        }
+        .result-item span:last-child {
+            font-weight: 600;
+            color: #1e3a8a; /* Indigo-900 */
+        }
+        .disclaimer {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 16px;
+            padding: 12px;
+            background-color: #fef3c7; /* Amber-100 */
+            border-left: 4px solid #f59e0b; /* Amber-500 */
+            border-radius: 8px;
+        }
+        .nav-button {
+            padding: 10px 16px;
+            border-radius: 9999px; /* Full rounded */
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            white-space: nowrap; /* Prevent wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .nav-button.active {
+            background-color: #4f46e5; /* Indigo-600 */
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+        .nav-button:not(.active):hover {
+            background-color: #e0e7ff; /* Indigo-100 */
+            color: #4f46e5;
+        }
+        /* Custom styles for select dropdown */
+        .custom-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%234A5568" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-6 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-8 md:p-10 mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-indigo-800 mb-6">Finance Calculator Suite</h1>
+
+        <!-- Navigation -->
+        <nav class="mb-8 overflow-x-auto whitespace-nowrap py-2">
+            <div class="flex space-x-3 justify-center">
+                <button class="nav-button active" onclick="showCalculator('sip-calculator')">SIP</button>
+                <button class="nav-button" onclick="showCalculator('mutual-fund-calculator')">Mutual Fund</button>
+                <button class="nav-button" onclick="showCalculator('emi-calculator')">EMI</button>
+                <button class="nav-button" onclick="showCalculator('fd-calculator')">FD</button>
+                <button class="nav-button" onclick="showCalculator('real-estate-calculator')">Real Estate</button>
+                <button class="nav-button" onclick="showCalculator('compound-interest-calculator')">Compound Interest</button>
+                <button class="nav-button" onclick="showCalculator('capital-gain-tax-calculator')">Capital Gain Tax</button>
+            </div>
+        </nav>
+
+        <main>
+            <!-- SIP Calculator -->
+            <section id="sip-calculator" class="calculator-section active">
+                <h2 class="text-2xl font-semibold text-indigo-700 mb-6 text-center">SIP Calculator</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label for="sipMonthlyInvestment" class="block text-sm">Monthly Investment (₹)</label>
+                        <input type="number" id="sipMonthlyInvestment" value="5000" min="0" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="sipReturnRate" class="block text-sm">Expected Return Rate (% p.a.)</label>
+                        <input type="number" id="sipReturnRate" value="12" min="0" step="0.1" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="sipInvestmentPeriod" class="block text-sm">Investment Period (Years)</label>
+                        <input type="number" id="sipInvestmentPeriod" value="10" min="0" class="mt-1">
+                    </div>
+                </div>
+                <div class="result-box">
+                    <div class="result-item">
+                        <span>Total Investment</span>
+                        <span id="sipTotalInvestment">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Estimated Returns</span>
+                        <span id="sipEstimatedReturns">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Total Value</span>
+                        <span id="sipTotalValue">₹ 0.00</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mutual Fund Calculator (Lumpsum) -->
+            <section id="mutual-fund-calculator" class="calculator-section">
+                <h2 class="text-2xl font-semibold text-indigo-700 mb-6 text-center">Mutual Fund (Lumpsum) Calculator</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label for="mfInitialInvestment" class="block text-sm">Initial Investment (₹)</label>
+                        <input type="number" id="mfInitialInvestment" value="100000" min="0" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="mfReturnRate" class="block text-sm">Expected Return Rate (% p.a.)</label>
+                        <input type="number" id="mfReturnRate" value="15" min="0" step="0.1" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="mfInvestmentPeriod" class="block text-sm">Investment Period (Years)</label>
+                        <input type="number" id="mfInvestmentPeriod" value="5" min="0" class="mt-1">
+                    </div>
+                </div>
+                <div class="result-box">
+                    <div class="result-item">
+                        <span>Total Investment</span>
+                        <span id="mfTotalInvestment">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Estimated Returns</span>
+                        <span id="mfEstimatedReturns">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Total Value</span>
+                        <span id="mfTotalValue">₹ 0.00</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EMI Calculator -->
+            <section id="emi-calculator" class="calculator-section">
+                <h2 class="text-2xl font-semibold text-indigo-700 mb-6 text-center">EMI Calculator</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label for="emiLoanAmount" class="block text-sm">Loan Amount (₹)</label>
+                        <input type="number" id="emiLoanAmount" value="500000" min="0" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="emiInterestRate" class="block text-sm">Interest Rate (% p.a.)</label>
+                        <input type="number" id="emiInterestRate" value="8.5" min="0" step="0.1" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="emiLoanTenure" class="block text-sm">Loan Tenure (Years)</label>
+                        <input type="number" id="emiLoanTenure" value="5" min="0" class="mt-1">
+                    </div>
+                </div>
+                <div class="result-box">
+                    <div class="result-item">
+                        <span>Monthly EMI</span>
+                        <span id="emiMonthlyPayment">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Total Interest Payable</span>
+                        <span id="emiTotalInterest">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Total Payment (Principal + Interest)</span>
+                        <span id="emiTotalPayment">₹ 0.00</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FD Calculator -->
+            <section id="fd-calculator" class="calculator-section">
+                <h2 class="text-2xl font-semibold text-indigo-700 mb-6 text-center">FD Calculator</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label for="fdPrincipalAmount" class="block text-sm">Principal Amount (₹)</label>
+                        <input type="number" id="fdPrincipalAmount" value="100000" min="0" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="fdInterestRate" class="block text-sm">Interest Rate (% p.a.)</label>
+                        <input type="number" id="fdInterestRate" value="7.0" min="0" step="0.1" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="fdTenure" class="block text-sm">Tenure (Years)</label>
+                        <input type="number" id="fdTenure" value="5" min="0" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="fdCompoundingFrequency" class="block text-sm">Compounding Frequency</label>
+                        <select id="fdCompoundingFrequency" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm custom-select">
+                            <option value="1">Annually</option>
+                            <option value="2">Semi-annually</option>
+                            <option value="4">Quarterly</option>
+                            <option value="12">Monthly</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="result-box">
+                    <div class="result-item">
+                        <span>Total Interest Earned</span>
+                        <span id="fdTotalInterest">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Maturity Amount</span>
+                        <span id="fdMaturityAmount">₹ 0.00</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Real Estate Calculator (Mortgage) -->
+            <section id="real-estate-calculator" class="calculator-section">
+                <h2 class="text-2xl font-semibold text-indigo-700 mb-6 text-center">Real Estate (Mortgage) Calculator</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label for="rePropertyValue" class="block text-sm">Property Value (₹)</label>
+                        <input type="number" id="rePropertyValue" value="5000000" min="0" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="reDownPayment" class="block text-sm">Down Payment (%)</label>
+                        <input type="number" id="reDownPayment" value="20" min="0" max="100" step="1" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="reInterestRate" class="block text-sm">Interest Rate (% p.a.)</label>
+                        <input type="number" id="reInterestRate" value="8.0" min="0" step="0.1" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="reLoanTenure" class="block text-sm">Loan Tenure (Years)</label>
+                        <input type="number" id="reLoanTenure" value="20" min="0" class="mt-1">
+                    </div>
+                </div>
+                <div class="result-box">
+                    <div class="result-item">
+                        <span>Loan Amount</span>
+                        <span id="reLoanAmount">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Monthly Payment (EMI)</span>
+                        <span id="reMonthlyPayment">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Total Interest Paid</span>
+                        <span id="reTotalInterest">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Total Payment</span>
+                        <span id="reTotalPayment">₹ 0.00</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Compound Interest Calculator -->
+            <section id="compound-interest-calculator" class="calculator-section">
+                <h2 class="text-2xl font-semibold text-indigo-700 mb-6 text-center">Compound Interest Calculator</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label for="ciPrincipalAmount" class="block text-sm">Principal Amount (₹)</label>
+                        <input type="number" id="ciPrincipalAmount" value="100000" min="0" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="ciAnnualRate" class="block text-sm">Annual Interest Rate (% p.a.)</label>
+                        <input type="number" id="ciAnnualRate" value="10" min="0" step="0.1" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="ciCompoundingFrequency" class="block text-sm">Compounding Frequency</label>
+                        <select id="ciCompoundingFrequency" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm custom-select">
+                            <option value="1">Annually</option>
+                            <option value="2">Semi-annually</option>
+                            <option value="4">Quarterly</option>
+                            <option value="12">Monthly</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="ciYears" class="block text-sm">Number of Years</label>
+                        <input type="number" id="ciYears" value="10" min="0" class="mt-1">
+                    </div>
+                </div>
+                <div class="result-box">
+                    <div class="result-item">
+                        <span>Future Value</span>
+                        <span id="ciFutureValue">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Total Interest Earned</span>
+                        <span id="ciTotalInterest">₹ 0.00</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Capital Gain Tax Calculator -->
+            <section id="capital-gain-tax-calculator" class="calculator-section">
+                <h2 class="text-2xl font-semibold text-indigo-700 mb-6 text-center">Capital Gain Tax Calculator</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label for="cgtPurchasePrice" class="block text-sm">Purchase Price (₹)</label>
+                        <input type="number" id="cgtPurchasePrice" value="100000" min="0" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="cgtSalePrice" class="block text-sm">Sale Price (₹)</label>
+                        <input type="number" id="cgtSalePrice" value="150000" min="0" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="cgtPurchaseDate" class="block text-sm">Purchase Date</label>
+                        <input type="date" id="cgtPurchaseDate" value="2023-01-01" class="mt-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="cgtSaleDate" class="block text-sm">Sale Date</label>
+                        <input type="date" id="cgtSaleDate" value="2024-07-01" class="mt-1">
+                    </div>
+                </div>
+                <div class="result-box">
+                    <div class="result-item">
+                        <span>Capital Gain/Loss</span>
+                        <span id="cgtGainLoss">₹ 0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Type of Gain</span>
+                        <span id="cgtGainType">N/A</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Estimated Tax (Illustrative)</span>
+                        <span id="cgtTaxAmount">₹ 0.00</span>
+                    </div>
+                </div>
+                <div class="disclaimer">
+                    **Disclaimer:** This Capital Gain Tax Calculator is for **illustrative purposes only** and uses simplified, hypothetical tax rates (e.g., 15% for short-term, 10% for long-term). **It is NOT tax advice.** Capital gains tax laws are complex and vary significantly by country, region, asset type, and individual circumstances. Please consult a qualified tax professional for accurate tax calculations and advice.
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Helper function for currency formatting
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        };
+
+        // --- Navigation Logic ---
+        const calculatorSections = document.querySelectorAll('.calculator-section');
+        const navButtons = document.querySelectorAll('.nav-button');
+
+        function showCalculator(id) {
+            calculatorSections.forEach(section => {
+                section.classList.remove('active');
+            });
+            navButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            document.getElementById(id).classList.add('active');
+            document.querySelector(`button[onclick="showCalculator('${id}')"]`).classList.add('active');
+
+            // Trigger calculation for the newly active calculator
+            switch (id) {
+                case 'sip-calculator':
+                    calculateSIP();
+                    break;
+                case 'mutual-fund-calculator':
+                    calculateMutualFund();
+                    break;
+                case 'emi-calculator':
+                    calculateEMI();
+                    break;
+                case 'fd-calculator':
+                    calculateFD();
+                    break;
+                case 'real-estate-calculator':
+                    calculateRealEstate();
+                    break;
+                case 'compound-interest-calculator':
+                    calculateCompoundInterest();
+                    break;
+                case 'capital-gain-tax-calculator':
+                    calculateCapitalGainTax();
+                    break;
+            }
+        }
+
+        // --- SIP Calculator Logic ---
+        const sipMonthlyInvestment = document.getElementById('sipMonthlyInvestment');
+        const sipReturnRate = document.getElementById('sipReturnRate');
+        const sipInvestmentPeriod = document.getElementById('sipInvestmentPeriod');
+        const sipTotalInvestmentSpan = document.getElementById('sipTotalInvestment');
+        const sipEstimatedReturnsSpan = document.getElementById('sipEstimatedReturns');
+        const sipTotalValueSpan = document.getElementById('sipTotalValue');
+
+        function calculateSIP() {
+            const M = parseFloat(sipMonthlyInvestment.value);
+            const R_annual = parseFloat(sipReturnRate.value);
+            const N_years = parseFloat(sipInvestmentPeriod.value);
+
+            if (isNaN(M) || isNaN(R_annual) || isNaN(N_years) || M < 0 || R_annual < 0 || N_years < 0) {
+                sipTotalInvestmentSpan.textContent = '₹ 0.00';
+                sipEstimatedReturnsSpan.textContent = '₹ 0.00';
+                sipTotalValueSpan.textContent = '₹ 0.00';
+                return;
+            }
+
+            const R_monthly = R_annual / 100 / 12;
+            const N_months = N_years * 12;
+
+            let futureValue = 0;
+            if (R_monthly === 0) { // Handle 0% interest rate
+                futureValue = M * N_months;
+            } else {
+                futureValue = M * ((Math.pow(1 + R_monthly, N_months) - 1) / R_monthly) * (1 + R_monthly);
+            }
+
+            const totalInvestment = M * N_months;
+            const estimatedReturns = futureValue - totalInvestment;
+
+            sipTotalInvestmentSpan.textContent = formatCurrency(totalInvestment);
+            sipEstimatedReturnsSpan.textContent = formatCurrency(estimatedReturns);
+            sipTotalValueSpan.textContent = formatCurrency(futureValue);
+        }
+
+        sipMonthlyInvestment.addEventListener('input', calculateSIP);
+        sipReturnRate.addEventListener('input', calculateSIP);
+        sipInvestmentPeriod.addEventListener('input', calculateSIP);
+
+        // --- Mutual Fund (Lumpsum) Calculator Logic ---
+        const mfInitialInvestment = document.getElementById('mfInitialInvestment');
+        const mfReturnRate = document.getElementById('mfReturnRate');
+        const mfInvestmentPeriod = document.getElementById('mfInvestmentPeriod');
+        const mfTotalInvestmentSpan = document.getElementById('mfTotalInvestment');
+        const mfEstimatedReturnsSpan = document.getElementById('mfEstimatedReturns');
+        const mfTotalValueSpan = document.getElementById('mfTotalValue');
+
+        function calculateMutualFund() {
+            const P = parseFloat(mfInitialInvestment.value);
+            const R_annual = parseFloat(mfReturnRate.value);
+            const N_years = parseFloat(mfInvestmentPeriod.value);
+
+            if (isNaN(P) || isNaN(R_annual) || isNaN(N_years) || P < 0 || R_annual < 0 || N_years < 0) {
+                mfTotalInvestmentSpan.textContent = '₹ 0.00';
+                mfEstimatedReturnsSpan.textContent = '₹ 0.00';
+                mfTotalValueSpan.textContent = '₹ 0.00';
+                return;
+            }
+
+            const R_decimal = R_annual / 100;
+            const futureValue = P * Math.pow(1 + R_decimal, N_years);
+            const estimatedReturns = futureValue - P;
+
+            mfTotalInvestmentSpan.textContent = formatCurrency(P);
+            mfEstimatedReturnsSpan.textContent = formatCurrency(estimatedReturns);
+            mfTotalValueSpan.textContent = formatCurrency(futureValue);
+        }
+
+        mfInitialInvestment.addEventListener('input', calculateMutualFund);
+        mfReturnRate.addEventListener('input', calculateMutualFund);
+        mfInvestmentPeriod.addEventListener('input', calculateMutualFund);
+
+        // --- EMI Calculator Logic ---
+        const emiLoanAmount = document.getElementById('emiLoanAmount');
+        const emiInterestRate = document.getElementById('emiInterestRate');
+        const emiLoanTenure = document.getElementById('emiLoanTenure');
+        const emiMonthlyPaymentSpan = document.getElementById('emiMonthlyPayment');
+        const emiTotalInterestSpan = document.getElementById('emiTotalInterest');
+        const emiTotalPaymentSpan = document.getElementById('emiTotalPayment');
+
+        function calculateEMI() {
+            const P = parseFloat(emiLoanAmount.value);
+            const R_annual = parseFloat(emiInterestRate.value);
+            const N_years = parseFloat(emiLoanTenure.value);
+
+            if (isNaN(P) || isNaN(R_annual) || isNaN(N_years) || P < 0 || R_annual < 0 || N_years < 0) {
+                emiMonthlyPaymentSpan.textContent = '₹ 0.00';
+                emiTotalInterestSpan.textContent = '₹ 0.00';
+                emiTotalPaymentSpan.textContent = '₹ 0.00';
+                return;
+            }
+
+            const R_monthly = R_annual / 100 / 12;
+            const N_months = N_years * 12;
+
+            let emi = 0;
+            if (R_monthly === 0) { // Handle 0% interest rate
+                emi = P / N_months;
+            } else {
+                emi = P * R_monthly * Math.pow(1 + R_monthly, N_months) / (Math.pow(1 + R_monthly, N_months) - 1);
+            }
+
+            const totalPayment = emi * N_months;
+            const totalInterest = totalPayment - P;
+
+            emiMonthlyPaymentSpan.textContent = formatCurrency(emi);
+            emiTotalInterestSpan.textContent = formatCurrency(totalInterest);
+            emiTotalPaymentSpan.textContent = formatCurrency(totalPayment);
+        }
+
+        emiLoanAmount.addEventListener('input', calculateEMI);
+        emiInterestRate.addEventListener('input', calculateEMI);
+        emiLoanTenure.addEventListener('input', calculateEMI);
+
+        // --- FD Calculator Logic ---
+        const fdPrincipalAmount = document.getElementById('fdPrincipalAmount');
+        const fdInterestRate = document.getElementById('fdInterestRate');
+        const fdTenure = document.getElementById('fdTenure');
+        const fdCompoundingFrequency = document.getElementById('fdCompoundingFrequency');
+        const fdTotalInterestSpan = document.getElementById('fdTotalInterest');
+        const fdMaturityAmountSpan = document.getElementById('fdMaturityAmount');
+
+        function calculateFD() {
+            const P = parseFloat(fdPrincipalAmount.value);
+            const R_annual = parseFloat(fdInterestRate.value);
+            const T_years = parseFloat(fdTenure.value);
+            const n = parseFloat(fdCompoundingFrequency.value); // Compounding frequency per year
+
+            if (isNaN(P) || isNaN(R_annual) || isNaN(T_years) || isNaN(n) || P < 0 || R_annual < 0 || T_years < 0) {
+                fdTotalInterestSpan.textContent = '₹ 0.00';
+                fdMaturityAmountSpan.textContent = '₹ 0.00';
+                return;
+            }
+
+            const R_decimal = R_annual / 100;
+            const maturityAmount = P * Math.pow((1 + R_decimal / n), (n * T_years));
+            const totalInterest = maturityAmount - P;
+
+            fdTotalInterestSpan.textContent = formatCurrency(totalInterest);
+            fdMaturityAmountSpan.textContent = formatCurrency(maturityAmount);
+        }
+
+        fdPrincipalAmount.addEventListener('input', calculateFD);
+        fdInterestRate.addEventListener('input', calculateFD);
+        fdTenure.addEventListener('input', calculateFD);
+        fdCompoundingFrequency.addEventListener('change', calculateFD);
+
+        // --- Real Estate (Mortgage) Calculator Logic ---
+        const rePropertyValue = document.getElementById('rePropertyValue');
+        const reDownPayment = document.getElementById('reDownPayment');
+        const reInterestRate = document.getElementById('reInterestRate');
+        const reLoanTenure = document.getElementById('reLoanTenure');
+        const reLoanAmountSpan = document.getElementById('reLoanAmount');
+        const reMonthlyPaymentSpan = document.getElementById('reMonthlyPayment');
+        const reTotalInterestSpan = document.getElementById('reTotalInterest');
+        const reTotalPaymentSpan = document.getElementById('reTotalPayment');
+
+        function calculateRealEstate() {
+            const propertyValue = parseFloat(rePropertyValue.value);
+            const downPaymentPercent = parseFloat(reDownPayment.value);
+            const R_annual = parseFloat(reInterestRate.value);
+            const N_years = parseFloat(reLoanTenure.value);
+
+            if (isNaN(propertyValue) || isNaN(downPaymentPercent) || isNaN(R_annual) || isNaN(N_years) ||
+                propertyValue < 0 || downPaymentPercent < 0 || downPaymentPercent > 100 || R_annual < 0 || N_years < 0) {
+                reLoanAmountSpan.textContent = '₹ 0.00';
+                reMonthlyPaymentSpan.textContent = '₹ 0.00';
+                reTotalInterestSpan.textContent = '₹ 0.00';
+                reTotalPaymentSpan.textContent = '₹ 0.00';
+                return;
+            }
+
+            const downPaymentAmount = propertyValue * (downPaymentPercent / 100);
+            const P = propertyValue - downPaymentAmount; // Loan Amount
+
+            const R_monthly = R_annual / 100 / 12;
+            const N_months = N_years * 12;
+
+            let emi = 0;
+            if (R_monthly === 0) { // Handle 0% interest rate
+                emi = P / N_months;
+            } else {
+                emi = P * R_monthly * Math.pow(1 + R_monthly, N_months) / (Math.pow(1 + R_monthly, N_months) - 1);
+            }
+
+            const totalPayment = emi * N_months;
+            const totalInterest = totalPayment - P;
+
+            reLoanAmountSpan.textContent = formatCurrency(P);
+            reMonthlyPaymentSpan.textContent = formatCurrency(emi);
+            reTotalInterestSpan.textContent = formatCurrency(totalInterest);
+            reTotalPaymentSpan.textContent = formatCurrency(totalPayment + downPaymentAmount); // Total paid includes down payment
+        }
+
+        rePropertyValue.addEventListener('input', calculateRealEstate);
+        reDownPayment.addEventListener('input', calculateRealEstate);
+        reInterestRate.addEventListener('input', calculateRealEstate);
+        reLoanTenure.addEventListener('input', calculateRealEstate);
+
+        // --- Compound Interest Calculator Logic ---
+        const ciPrincipalAmount = document.getElementById('ciPrincipalAmount');
+        const ciAnnualRate = document.getElementById('ciAnnualRate');
+        const ciCompoundingFrequency = document.getElementById('ciCompoundingFrequency');
+        const ciYears = document.getElementById('ciYears');
+        const ciFutureValueSpan = document.getElementById('ciFutureValue');
+        const ciTotalInterestSpan = document.getElementById('ciTotalInterest');
+
+        function calculateCompoundInterest() {
+            const P = parseFloat(ciPrincipalAmount.value);
+            const R_annual = parseFloat(ciAnnualRate.value);
+            const n = parseFloat(ciCompoundingFrequency.value); // Compounding frequency per year
+            const T_years = parseFloat(ciYears.value);
+
+            if (isNaN(P) || isNaN(R_annual) || isNaN(n) || isNaN(T_years) || P < 0 || R_annual < 0 || T_years < 0) {
+                ciFutureValueSpan.textContent = '₹ 0.00';
+                ciTotalInterestSpan.textContent = '₹ 0.00';
+                return;
+            }
+
+            const R_decimal = R_annual / 100;
+            const futureValue = P * Math.pow((1 + R_decimal / n), (n * T_years));
+            const totalInterest = futureValue - P;
+
+            ciFutureValueSpan.textContent = formatCurrency(futureValue);
+            ciTotalInterestSpan.textContent = formatCurrency(totalInterest);
+        }
+
+        ciPrincipalAmount.addEventListener('input', calculateCompoundInterest);
+        ciAnnualRate.addEventListener('input', calculateCompoundInterest);
+        ciCompoundingFrequency.addEventListener('change', calculateCompoundInterest);
+        ciYears.addEventListener('input', calculateCompoundInterest);
+
+        // --- Capital Gain Tax Calculator Logic ---
+        const cgtPurchasePrice = document.getElementById('cgtPurchasePrice');
+        const cgtSalePrice = document.getElementById('cgtSalePrice');
+        const cgtPurchaseDate = document.getElementById('cgtPurchaseDate');
+        const cgtSaleDate = document.getElementById('cgtSaleDate');
+        const cgtGainLossSpan = document.getElementById('cgtGainLoss');
+        const cgtGainTypeSpan = document.getElementById('cgtGainType');
+        const cgtTaxAmountSpan = document.getElementById('cgtTaxAmount');
+
+        function calculateCapitalGainTax() {
+            const purchasePrice = parseFloat(cgtPurchasePrice.value);
+            const salePrice = parseFloat(cgtSalePrice.value);
+            const pDate = new Date(cgtPurchaseDate.value);
+            const sDate = new Date(cgtSaleDate.value);
+
+            if (isNaN(purchasePrice) || isNaN(salePrice) || purchasePrice < 0 || salePrice < 0 || isNaN(pDate.getTime()) || isNaN(sDate.getTime())) {
+                cgtGainLossSpan.textContent = '₹ 0.00';
+                cgtGainTypeSpan.textContent = 'N/A';
+                cgtTaxAmountSpan.textContent = '₹ 0.00';
+                return;
+            }
+
+            const capitalGainLoss = salePrice - purchasePrice;
+            cgtGainLossSpan.textContent = formatCurrency(capitalGainLoss);
+
+            let gainType = 'N/A';
+            let taxRate = 0;
+            let taxAmount = 0;
+
+            if (capitalGainLoss > 0) {
+                const diffTime = Math.abs(sDate - pDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const yearsHeld = diffDays / 365.25; // Account for leap years
+
+                if (yearsHeld < 1) {
+                    gainType = 'Short-Term Capital Gain (STCG)';
+                    taxRate = 0.15; // Illustrative STCG tax rate (15%)
+                } else {
+                    gainType = 'Long-Term Capital Gain (LTCG)';
+                    taxRate = 0.10; // Illustrative LTCG tax rate (10%)
+                }
+                taxAmount = capitalGainLoss * taxRate;
+            } else if (capitalGainLoss < 0) {
+                gainType = 'Capital Loss';
+                // For simplicity, not calculating tax benefit on loss here
+            } else {
+                gainType = 'No Gain/Loss';
+            }
+
+            cgtGainTypeSpan.textContent = gainType;
+            cgtTaxAmountSpan.textContent = formatCurrency(taxAmount);
+        }
+
+        cgtPurchasePrice.addEventListener('input', calculateCapitalGainTax);
+        cgtSalePrice.addEventListener('input', calculateCapitalGainTax);
+        cgtPurchaseDate.addEventListener('change', calculateCapitalGainTax);
+        cgtSaleDate.addEventListener('change', calculateCapitalGainTax);
+
+        // Initial calculations when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateSIP();
+            calculateMutualFund();
+            calculateEMI();
+            calculateFD();
+            calculateRealEstate();
+            calculateCompoundInterest();
+            calculateCapitalGainTax();
+        });
+    </script>
+
+</body>
+</html>
